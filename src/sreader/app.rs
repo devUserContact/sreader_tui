@@ -10,6 +10,10 @@ pub struct App {
     pub running: bool,
     /// counter
     pub counter: u8,
+
+    pub book_current_index: u8,
+
+    pub book_length: usize
 }
 
 impl Default for App {
@@ -17,6 +21,8 @@ impl Default for App {
         Self {
             running: true,
             counter: 0,
+            book_current_index: 0,
+            book_length: 0
         }
     }
 }
