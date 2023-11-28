@@ -14,4 +14,4 @@ pub mod tui;
 pub mod handler;
 
 /// Iterate Text
-pub mod iter_text;
+pub mod text;

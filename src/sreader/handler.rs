@@ -22,6 +22,9 @@ pub fn handle_key_events(key_event: KeyEvent, app: &mut App) -> AppResult<()> {
             app.decrement_counter();
         }
         // Other handlers you could add here.
+        KeyCode::Char('l') => {
+            app.text_load();
+        }
         _ => {}
     }
     Ok(())

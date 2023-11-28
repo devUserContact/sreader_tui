@@ -1,4 +1,5 @@
 use std::error;
+use crate::sreader::text;
 
 /// Application result type.
 pub type AppResult<T> = std::result::Result<T, Box<dyn error::Error>>;
@@ -50,6 +51,20 @@ impl App {
     pub fn decrement_counter(&mut self) {
         if let Some(res) = self.counter.checked_sub(3) {
             self.counter = res;
+        }
+    }
+
+    pub fn text_load(&mut self) {
+        text::text_process();
+    }
+    pub fn increment_word(&mut self) {
+        if let Some(res) = self.book_current_index.checked_add(1) {
+            self.book_current_index = res;
+        }
+    }
+    pub fn decrement_word(&mut self) {
+        if let Some(res) = self.book_current_index.checked_sub(1) {
+            self.book_current_index = res;
         }
     }
 }
