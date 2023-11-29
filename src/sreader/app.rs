@@ -1,5 +1,5 @@
 use std::error;
-use crate::sreader::text;
+use std::fs;
 
 /// Application result type.
 pub type AppResult<T> = std::result::Result<T, Box<dyn error::Error>>;
@@ -14,7 +14,7 @@ pub struct App {
 
     pub book_current_index: u8,
 
-    pub book_length: usize
+    pub book_length: usize,
 }
 
 impl Default for App {
@@ -23,7 +23,7 @@ impl Default for App {
             running: true,
             counter: 0,
             book_current_index: 0,
-            book_length: 0
+            book_length: 0,
         }
     }
 }
@@ -55,7 +55,11 @@ impl App {
     }
 
     pub fn text_load(&mut self) {
-        text::text_process();
+        let book: String =
+            fs::read_to_string("./assets/lewisCarroll_alicesAdventuresInWonderland.txt")
+                .expect("failed to read file");
+        let book_words: Vec<String> = book.split(" ").map(|s| s.to_string()).collect();
+        self.book_length = book_words.len();
     }
     pub fn increment_word(&mut self) {
         if let Some(res) = self.book_current_index.checked_add(1) {
