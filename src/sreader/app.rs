@@ -12,9 +12,13 @@ pub struct App {
     /// counter
     pub counter: u8,
 
-    pub book_current_index: u8,
+    pub text_array: Vec<String>,
 
-    pub book_length: usize,
+    pub text_current_word: String,
+
+    pub text_current_index: usize,
+
+    pub text_length: usize,
 }
 
 impl Default for App {
@@ -22,8 +26,10 @@ impl Default for App {
         Self {
             running: true,
             counter: 0,
-            book_current_index: 0,
-            book_length: 0,
+            text_array: Vec::new(),
+            text_current_word: "".to_string(),
+            text_current_index: 0,
+            text_length: 0,
         }
     }
 }
@@ -58,17 +64,20 @@ impl App {
         let book: String =
             fs::read_to_string("./assets/lewisCarroll_alicesAdventuresInWonderland.txt")
                 .expect("failed to read file");
-        let book_words: Vec<String> = book.split(" ").map(|s| s.to_string()).collect();
-        self.book_length = book_words.len();
+        self.text_array = book.split(" ").map(|s| s.to_string()).collect();
+        self.text_current_word = self.text_array[self.text_current_index.clone()].clone();
+        self.text_length = self.text_array.len();
     }
     pub fn increment_word(&mut self) {
-        if let Some(res) = self.book_current_index.checked_add(1) {
-            self.book_current_index = res;
+        if let Some(res) = self.text_current_index.checked_add(1) {
+            self.text_current_index = res;
+            self.text_current_word = self.text_array[self.text_current_index.clone()].clone();
         }
     }
     pub fn decrement_word(&mut self) {
-        if let Some(res) = self.book_current_index.checked_sub(1) {
-            self.book_current_index = res;
+        if let Some(res) = self.text_current_index.checked_sub(1) {
+            self.text_current_index = res;
+            self.text_current_word = self.text_array[self.text_current_index.clone()].clone();
         }
     }
 }
