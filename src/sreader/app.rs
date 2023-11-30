@@ -64,7 +64,7 @@ impl App {
         let book: String =
             fs::read_to_string("./assets/lewisCarroll_alicesAdventuresInWonderland.txt")
                 .expect("failed to read file");
-        self.text_array = book.split(" ").map(|s| s.to_string()).collect();
+        self.text_array = book.split_whitespace().map(|s| s.to_string()).collect();
         self.text_current_word = self.text_array[self.text_current_index.clone()].clone();
         self.text_length = self.text_array.len();
     }
