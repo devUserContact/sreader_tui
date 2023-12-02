@@ -58,7 +58,7 @@ impl App {
         self.text_length = self.text_array.len();
     }
     pub fn sread_text(&mut self) {
-        self.text_play_on = true;
+        self.text_play_on = !self.text_play_on;
         if self.text_play_on == true {
             if let Some(res) = self.text_current_index.checked_add(1) {
                 sleep(Duration::from_secs(1));
@@ -66,7 +66,6 @@ impl App {
                 self.text_current_word = self.text_array[self.text_current_index.clone()].clone();
             }
         } else {
-
         }
     }
     pub fn increment_word(&mut self) {
