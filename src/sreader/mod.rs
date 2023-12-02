@@ -12,6 +12,3 @@ pub mod tui;
 
 /// Event handler.
 pub mod handler;
-
-/// Iterate Text
-pub mod text;

@@ -25,6 +25,9 @@ pub fn handle_key_events(key_event: KeyEvent, app: &mut App) -> AppResult<()> {
         KeyCode::Char('l') => {
             app.text_load();
         }
+        KeyCode::Char(' ') => {
+            app.sread_text();
+        }
         _ => {}
     }
     Ok(())
