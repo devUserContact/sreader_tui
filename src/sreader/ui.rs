@@ -2,7 +2,7 @@ use tui::{
     backend::Backend,
     layout::Alignment,
     style::{Color, Style},
-    widgets::{Block, BorderType, Borders, Cell, Paragraph, Row, Table},
+    widgets::{Block, BorderType, Borders, Paragraph},
     Frame,
 };
 
