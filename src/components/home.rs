@@ -86,11 +86,11 @@ impl Home {
     });
   }
 
-  pub fn schedule_text_load(&mut self, i: usize) {
+  pub fn schedule_text_load(&mut self) {
     let tx = self.action_tx.clone().unwrap();
     tokio::spawn(async move {
       tx.send(Action::EnterProcessing).unwrap();
-      tokio::time::sleep(Duration::from_secs(1)).await;
+      // tokio::time::sleep(Duration::from_secs(1)).await;
       tx.send(Action::TextLoad()).unwrap();
       tx.send(Action::ExitProcessing).unwrap();
     });
@@ -104,11 +104,12 @@ impl Home {
     self.counter = self.counter.saturating_sub(i);
   }
 
+  // sreader
   pub fn text_load(&mut self) {
     let book: String =
       fs::read_to_string("./assets/lewisCarroll_alicesAdventuresInWonderland.txt").expect("failed to read file");
     self.text_array = book.split_whitespace().map(|s| s.to_string()).collect();
-    self.text_current_word = self.text_array[self.text_current_index.clone()].clone();
+    self.text_current_word = self.text_array[0].clone();
     self.text_length = self.text_array.len();
   }
   pub fn sread_text(&mut self) {
@@ -119,12 +120,11 @@ impl Home {
       }
     }
   }
-  pub fn increment_word(&mut self) -> String {
+  pub fn increment_word(&mut self) {
     if let Some(res) = self.text_current_index.checked_add(1) {
       self.text_current_index = res;
       self.text_current_word = self.text_array[self.text_current_index.clone()].clone();
     }
-    return self.text_current_word.clone();
   }
   pub fn decrement_word(&mut self) {
     if let Some(res) = self.text_current_index.checked_sub(1) {
@@ -133,6 +133,7 @@ impl Home {
     }
   }
 }
+
 impl Component for Home {
   fn register_action_handler(&mut self, tx: UnboundedSender<Action>) -> Result<()> {
     self.action_tx = Some(tx);
@@ -169,7 +170,7 @@ impl Component for Home {
       Action::ToggleShowHelp => self.show_help = !self.show_help,
       Action::ScheduleIncrement => self.schedule_increment(1),
       Action::ScheduleDecrement => self.schedule_decrement(1),
-      Action::ScheduleTextLoad => self.schedule_text_load(1),
+      Action::ScheduleTextLoad => self.schedule_text_load(),
       Action::Increment(i) => self.increment(i),
       Action::Decrement(i) => self.decrement(i),
       Action::TextLoad() => self.text_load(),
@@ -203,6 +204,12 @@ impl Component for Home {
     text.insert(0, format!("Render Ticker: {}", self.render_ticker).into());
     text.insert(0, format!("App Ticker: {}", self.app_ticker).into());
     text.insert(0, format!("Counter: {}", self.counter).into());
+
+    text.insert(0, "".into());
+    text.insert(0, "".into());
+    text.insert(0, format!("Current Word: {}/{}", self.text_current_index, self.text_length).into());
+    text.insert(0, format!("{}", self.text_current_word).into());
+    text.insert(0, "".into());
     text.insert(0, "".into());
     text.insert(
       0,
@@ -269,9 +276,10 @@ impl Component for Home {
       let rows = vec![
         Row::new(vec!["?", "Open Help"]),
         Row::new(vec!["l", "Load Text"]),
+        Row::new(vec!["Space", "Play/Pause Text"]),
         Row::new(vec!["j", "Increment Text"]),
         Row::new(vec!["k", "Decrement Text"]),
-        Row::new(vec!["Space", "Play/Pause Text"]),
+        Row::new(vec![""]),
         Row::new(vec!["/", "Enter Input"]),
         Row::new(vec!["ESC", "Exit Input"]),
         Row::new(vec!["Enter", "Submit Input"]),

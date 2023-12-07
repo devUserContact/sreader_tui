@@ -61,7 +61,7 @@ impl<'de> Deserialize<'de> for Action {
           "Help" => Ok(Action::Help),
           "ScheduleIncrement" => Ok(Action::ScheduleIncrement),
           "ScheduleDecrement" => Ok(Action::ScheduleDecrement),
-          "ScheduleTextLoad" => Ok(Action::ScheduleDecrement),
+          "ScheduleTextLoad" => Ok(Action::ScheduleTextLoad),
           "ToggleShowHelp" => Ok(Action::ToggleShowHelp),
           "EnterInsert" => Ok(Action::EnterInsert),
           "EnterNormal" => Ok(Action::EnterNormal),
