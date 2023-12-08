@@ -2,9 +2,10 @@
   "keybindings": {
     "Home": {
       "<q>": "Quit", // Quit the application
-      "<j>": "ScheduleIncrement",
-      "<k>": "ScheduleDecrement",
+      "<j>": "ScheduleIncrementText",
+      "<k>": "ScheduleDecrementText",
       "<l>": "ScheduleTextLoad",
+      "< >": "ScheduleSreadText",
       "<?>": "ToggleShowHelp",
       "</>": "EnterInsert",
       "<Ctrl-d>": "Quit", // Another way to quit

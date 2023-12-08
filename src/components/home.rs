@@ -66,26 +66,6 @@ impl Home {
     self.text.push(s)
   }
 
-  pub fn schedule_increment(&mut self, i: usize) {
-    let tx = self.action_tx.clone().unwrap();
-    tokio::spawn(async move {
-      tx.send(Action::EnterProcessing).unwrap();
-      tokio::time::sleep(Duration::from_secs(1)).await;
-      tx.send(Action::Increment(i)).unwrap();
-      tx.send(Action::ExitProcessing).unwrap();
-    });
-  }
-
-  pub fn schedule_decrement(&mut self, i: usize) {
-    let tx = self.action_tx.clone().unwrap();
-    tokio::spawn(async move {
-      tx.send(Action::EnterProcessing).unwrap();
-      tokio::time::sleep(Duration::from_secs(1)).await;
-      tx.send(Action::Decrement(i)).unwrap();
-      tx.send(Action::ExitProcessing).unwrap();
-    });
-  }
-
   pub fn schedule_text_load(&mut self) {
     let tx = self.action_tx.clone().unwrap();
     tokio::spawn(async move {
@@ -96,12 +76,34 @@ impl Home {
     });
   }
 
-  pub fn increment(&mut self, i: usize) {
-    self.counter = self.counter.saturating_add(i);
+  pub fn schedule_increment_text(&mut self, i: usize) {
+    let tx = self.action_tx.clone().unwrap();
+    tokio::spawn(async move {
+      tx.send(Action::EnterProcessing).unwrap();
+      // tokio::time::sleep(Duration::from_secs(1)).await;
+      tx.send(Action::IncrementText(i)).unwrap();
+      tx.send(Action::ExitProcessing).unwrap();
+    });
   }
 
-  pub fn decrement(&mut self, i: usize) {
-    self.counter = self.counter.saturating_sub(i);
+  pub fn schedule_decrement_text(&mut self, i: usize) {
+    let tx = self.action_tx.clone().unwrap();
+    tokio::spawn(async move {
+      tx.send(Action::EnterProcessing).unwrap();
+      // tokio::time::sleep(Duration::from_secs(1)).await;
+      tx.send(Action::DecrementText(i)).unwrap();
+      tx.send(Action::ExitProcessing).unwrap();
+    });
+  }
+
+  pub fn schedule_sread_text(&mut self, i: usize) {
+    let tx = self.action_tx.clone().unwrap();
+    tokio::spawn(async move {
+      tx.send(Action::EnterProcessing).unwrap();
+      // tokio::time::sleep(Duration::from_secs(1)).await;
+      tx.send(Action::SreadText(i)).unwrap();
+      tx.send(Action::ExitProcessing).unwrap();
+    });
   }
 
   // sreader
@@ -112,22 +114,23 @@ impl Home {
     self.text_current_word = self.text_array[0].clone();
     self.text_length = self.text_array.len();
   }
-  pub fn sread_text(&mut self) {
+  pub fn sread_text(&mut self, i: usize) {
     self.text_play_on = !self.text_play_on;
-    for _i in 0..5 {
-      if self.text_play_on && self.text_current_index < self.text_length {
-        let _ = sleep(Duration::from_secs(1) / self.text_read_rate);
+    while self.text_play_on && self.text_current_index < self.text_length {
+      self.increment_text(i);
+      if self.text_current_index == self.text_length - 1 {
+        break;
       }
     }
   }
-  pub fn increment_word(&mut self) {
-    if let Some(res) = self.text_current_index.checked_add(1) {
+  pub fn increment_text(&mut self, i: usize) {
+    if let Some(res) = self.text_current_index.checked_add(i) {
       self.text_current_index = res;
       self.text_current_word = self.text_array[self.text_current_index.clone()].clone();
     }
   }
-  pub fn decrement_word(&mut self) {
-    if let Some(res) = self.text_current_index.checked_sub(1) {
+  pub fn decrement_text(&mut self, i: usize) {
+    if let Some(res) = self.text_current_index.checked_sub(i) {
       self.text_current_index = res;
       self.text_current_word = self.text_array[self.text_current_index.clone()].clone();
     }
@@ -168,12 +171,14 @@ impl Component for Home {
       Action::Tick => self.tick(),
       Action::Render => self.render_tick(),
       Action::ToggleShowHelp => self.show_help = !self.show_help,
-      Action::ScheduleIncrement => self.schedule_increment(1),
-      Action::ScheduleDecrement => self.schedule_decrement(1),
+      Action::ScheduleIncrementText => self.schedule_increment_text(1),
+      Action::ScheduleDecrementText => self.schedule_decrement_text(1),
       Action::ScheduleTextLoad => self.schedule_text_load(),
-      Action::Increment(i) => self.increment(i),
-      Action::Decrement(i) => self.decrement(i),
+      Action::ScheduleSreadText => self.schedule_sread_text(1),
+      Action::IncrementText(i) => self.increment_text(i),
+      Action::DecrementText(i) => self.decrement_text(i),
       Action::TextLoad() => self.text_load(),
+      Action::SreadText(i) => self.sread_text(i),
       Action::CompleteInput(s) => self.add(s),
       Action::EnterNormal => {
         self.mode = Mode::Normal;
