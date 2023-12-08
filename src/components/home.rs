@@ -1,4 +1,4 @@
-use std::{collections::HashMap, fs, time::Duration};
+use std::{collections::HashMap, fs, thread, time::Duration};
 
 use color_eyre::eyre::Result;
 use crossterm::event::{KeyCode, KeyEvent};
@@ -97,12 +97,16 @@ impl Home {
   }
 
   pub fn schedule_sread_text(&mut self, i: usize) {
+    self.text_play_on = !self.text_play_on;
+    let j = self.text_length - self.text_current_index;
     let tx = self.action_tx.clone().unwrap();
     tokio::spawn(async move {
-      tx.send(Action::EnterProcessing).unwrap();
-      // tokio::time::sleep(Duration::from_secs(1)).await;
-      tx.send(Action::SreadText(i)).unwrap();
-      tx.send(Action::ExitProcessing).unwrap();
+      for k in 1..j {
+        tokio::time::sleep(Duration::from_secs(1) / 6).await;
+        tx.send(Action::EnterProcessing).unwrap();
+        tx.send(Action::SreadText(i)).unwrap();
+        tx.send(Action::ExitProcessing).unwrap();
+      }
     });
   }
 
@@ -115,12 +119,12 @@ impl Home {
     self.text_length = self.text_array.len();
   }
   pub fn sread_text(&mut self, i: usize) {
-    self.text_play_on = !self.text_play_on;
-    while self.text_play_on && self.text_current_index < self.text_length {
+    if self.text_play_on {
       self.increment_text(i);
       if self.text_current_index == self.text_length - 1 {
-        break;
+        return;
       }
+      return;
     }
   }
   pub fn increment_text(&mut self, i: usize) {
