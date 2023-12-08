@@ -208,6 +208,7 @@ impl Component for Home {
     text.insert(0, "".into());
     text.insert(0, "".into());
     text.insert(0, format!("Current Word: {}/{}", self.text_current_index, self.text_length).into());
+    text.insert(0, "".into());
     text.insert(0, format!("{}", self.text_current_word).into());
     text.insert(0, "".into());
     text.insert(0, "".into());
