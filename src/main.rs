@@ -15,13 +15,14 @@ use clap::Parser;
 use cli::Cli;
 use color_eyre::eyre::Result;
 
+use console_subscriber::ConsoleLayer;
+
 use crate::{
   app::App,
   utils::{initialize_logging, initialize_panic_handler, version},
 };
 
 async fn tokio_main() -> Result<()> {
-  initialize_logging()?;
 
   initialize_panic_handler()?;
 
@@ -34,6 +35,9 @@ async fn tokio_main() -> Result<()> {
 
 #[tokio::main]
 async fn main() -> Result<()> {
+
+  ConsoleLayer::builder().with_default_env().init();
+
   if let Err(e) = tokio_main().await {
     eprintln!("{} error: Something went wrong", env!("CARGO_PKG_NAME"));
     Err(e)

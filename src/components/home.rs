@@ -1,9 +1,10 @@
-use std::{collections::HashMap, fs, thread, time::Duration};
-
 use color_eyre::eyre::Result;
 use crossterm::event::{KeyCode, KeyEvent};
+use futures::future::{AbortHandle, Abortable, Aborted};
 use log::error;
 use ratatui::{prelude::*, widgets::*};
+use std::future::Future;
+use std::{collections::HashMap, fs, thread, time::Duration};
 use tokio::sync::mpsc::UnboundedSender;
 use tokio::time::sleep;
 use tracing::trace;
@@ -98,16 +99,29 @@ impl Home {
 
   pub fn schedule_sread_text(&mut self, i: usize) {
     self.text_play_on = !self.text_play_on;
+
+    let mut break_sread: bool = true;
     let j = self.text_length - self.text_current_index;
     let tx = self.action_tx.clone().unwrap();
-    tokio::spawn(async move {
-      for k in 1..j {
-        tokio::time::sleep(Duration::from_secs(1) / 6).await;
-        tx.send(Action::EnterProcessing).unwrap();
-        tx.send(Action::SreadText(i)).unwrap();
-        tx.send(Action::ExitProcessing).unwrap();
-      }
-    });
+
+    break_sread = !break_sread;
+
+    if self.text_play_on {
+      let sread_task = tokio::spawn(async move {
+        for k in 1..j {
+          tokio::time::sleep(Duration::from_secs(1) / 2).await;
+          tx.send(Action::EnterProcessing).unwrap();
+          tx.send(Action::SreadText(i)).unwrap();
+          tx.send(Action::ExitProcessing).unwrap();
+          if break_sread {
+            break;
+          }
+        }
+        return;
+      });
+      return;
+    }
+    return;
   }
 
   // sreader
@@ -207,12 +221,13 @@ impl Component for Home {
     let rects = Layout::default().constraints([Constraint::Percentage(100), Constraint::Min(3)].as_ref()).split(rect);
 
     let mut text: Vec<Line> = self.text.clone().iter().map(|l| Line::from(l.clone())).collect();
-    text.insert(0, "".into());
-    text.insert(0, "Type into input and hit enter to display here".dim().into());
-    text.insert(0, "".into());
-    text.insert(0, format!("Render Ticker: {}", self.render_ticker).into());
-    text.insert(0, format!("App Ticker: {}", self.app_ticker).into());
-    text.insert(0, format!("Counter: {}", self.counter).into());
+
+    //    text.insert(0, "".into());
+    //    text.insert(0, "Type into input and hit enter to display here".dim().into());
+    //    text.insert(0, "".into());
+    //    text.insert(0, format!("Render Ticker: {}", self.render_ticker).into());
+    //    text.insert(0, format!("App Ticker: {}", self.app_ticker).into());
+    //    text.insert(0, format!("Counter: {}", self.counter).into());
 
     text.insert(0, "".into());
     text.insert(0, "".into());
