@@ -1,12 +1,14 @@
 use color_eyre::eyre::Result;
 use crossterm::event::{KeyCode, KeyEvent};
-use futures::future::{AbortHandle, Abortable, Aborted};
+use futures::future::{abortable, Abortable};
 use log::error;
 use ratatui::{prelude::*, widgets::*};
 use std::future::Future;
 use std::{collections::HashMap, fs, thread, time::Duration};
+
 use tokio::sync::mpsc::UnboundedSender;
 use tokio::time::sleep;
+
 use tracing::trace;
 use tui_input::{backend::crossterm::EventHandler, Input};
 
@@ -104,11 +106,14 @@ impl Home {
     let j = self.text_length - self.text_current_index;
     let tx = self.action_tx.clone().unwrap();
 
+    let text_current_index = self.text_current_index;
+    let text_length = self.text_length;
+
     break_sread = !break_sread;
 
     if self.text_play_on {
       let sread_task = tokio::spawn(async move {
-        for k in 1..j {
+        while text_current_index < text_length {
           tokio::time::sleep(Duration::from_secs(1) / 2).await;
           tx.send(Action::EnterProcessing).unwrap();
           tx.send(Action::SreadText(i)).unwrap();
@@ -117,11 +122,8 @@ impl Home {
             break;
           }
         }
-        return;
       });
-      return;
     }
-    return;
   }
 
   // sreader
