@@ -7,6 +7,7 @@ use std::future::Future;
 use std::{collections::HashMap, fs, thread, time::Duration};
 
 use tokio::sync::mpsc::UnboundedSender;
+use tokio::task::JoinHandle;
 use tokio::time::sleep;
 
 use tracing::trace;
@@ -102,27 +103,27 @@ impl Home {
   pub fn schedule_sread_text(&mut self, i: usize) {
     self.text_play_on = !self.text_play_on;
 
-    let mut break_sread: bool = true;
+    let mut handles = Vec::new();
     let j = self.text_length - self.text_current_index;
     let tx = self.action_tx.clone().unwrap();
 
     let text_current_index = self.text_current_index;
     let text_length = self.text_length;
 
-    break_sread = !break_sread;
-
     if self.text_play_on {
-      let sread_task = tokio::spawn(async move {
+      handles.push(tokio::spawn(async move {
         while text_current_index < text_length {
           tokio::time::sleep(Duration::from_secs(1) / 2).await;
           tx.send(Action::EnterProcessing).unwrap();
           tx.send(Action::SreadText(i)).unwrap();
           tx.send(Action::ExitProcessing).unwrap();
-          if break_sread {
-            break;
-          }
         }
-      });
+      }));
+    } else {
+      for handle in &handles {
+        handle.abort();
+        return;
+      }
     }
   }
 
